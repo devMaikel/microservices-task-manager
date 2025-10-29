@@ -9,6 +9,12 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "chokidar": "^3.6.0",
+    "commander": "^14.0.2",
+    "glob": "^11.0.3",
+    "glob-parent": "^6.0.2",
+    "minimatch": "^10.1.1",
+    "path-scurry": "^2.0.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
     "typescript": "5.9.2"
@@ -20,5 +26,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@nestjs/microservices": "^10.4.20",
+    "amqp-connection-manager": "^5.0.0",
+    "amqplib": "^0.10.9"
+  }
 }

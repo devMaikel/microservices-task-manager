@@ -1,14 +1,22 @@
-FROM node:20-alpine AS base
+# ---------- Base ----------
+FROM node:18-alpine AS base
 WORKDIR /app
-COPY package*.json ./
+ENV NODE_ENV=development
 
+# ---------- Development ----------
 FROM base AS development
-RUN npm install
-COPY . .
-CMD ["npm", "run", "dev"]
+RUN npm install -g @nestjs/cli
 
-FROM base AS production
-RUN npm ci
-COPY . .
-RUN npm run build
-CMD ["node", "dist/main.js"]
+# Copia apenas o root e a pasta apps
+COPY ../../package*.json ./
+COPY ../../tsconfig*.json ./
+COPY ../../turbo.json ./
+COPY ../../apps ./apps
+COPY ../../packages ./packages
+
+# Instala apenas dependências
+RUN npm install
+
+# Gera build incremental do Turborepo (somente este serviço)
+RUN npx turbo build --filter=notifications-service...
+CMD ["npm", "--workspace=apps/notifications-service", "run", "dev"]
