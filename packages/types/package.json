@@ -1,0 +1,23 @@
+{
+  "name": "@packages/types",
+  "version": "1.0.0",
+  "description": "Tipos, Enums e Constantes compartilhadas do Monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "monorepo",
+    "types",
+    "nestjs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,21 +1,18 @@
-# apps/web/Dockerfile
-FROM node:20-bullseye AS base
+FROM node:20-bullseye AS development
+
 WORKDIR /app
-FROM base AS development
-# Copia root configs
-COPY package.json package-lock.json turbo.json ./
 
-# Copia workspaces
-COPY apps/web/package.json ./apps/web/
-COPY packages ./packages
-
-# Instala dependências
+COPY package*.json ./
 RUN npm install
 
-# Copia todo o restante
+COPY apps/web/package*.json ./apps/web/
+WORKDIR /app/apps/web
+RUN npm install
+
+WORKDIR /app
 COPY . .
 
 EXPOSE 3000
-# CMD ["npm", "run", "dev"]
-RUN npx turbo build --filter=web...
-CMD ["npm", "--workspace=apps/web", "run", "dev"]
+
+WORKDIR /app/apps/web
+CMD ["npm", "run", "dev"]
