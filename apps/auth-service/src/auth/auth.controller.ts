@@ -12,7 +12,7 @@ export class AuthController {
 
   @MessagePattern({ cmd: 'register_user' })
   async handleRegisterUser(data: RegisterUserDto) {
-    this.logger.log(`Recebendo comando 'register_user' para: ${data.email}`);
+    this.logger.log(`Recebendo o comando 'register_user' para: ${data.email}`);
     const newUser = await this.authService.register(data);
     return newUser;
   }
@@ -27,8 +27,6 @@ export class AuthController {
   @MessagePattern({ cmd: 'refresh_token' })
   async handleRefreshToken(data: { refreshToken: string }) {
     this.logger.log(`Recebendo comando 'refresh_token'`);
-    // Maikel implementar o método no AuthService em breve:
-    // return this.authService.refreshToken(data.refreshToken);
     return this.authService.refreshAccessToken(data.refreshToken);
   }
 }
