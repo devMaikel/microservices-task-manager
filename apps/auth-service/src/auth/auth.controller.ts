@@ -8,7 +8,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {} 
+  constructor(private readonly authService: AuthService) {}
 
   @MessagePattern({ cmd: 'register_user' })
   async handleRegisterUser(data: RegisterUserDto) {
@@ -29,6 +29,6 @@ export class AuthController {
     this.logger.log(`Recebendo comando 'refresh_token'`);
     // Maikel implementar o método no AuthService em breve:
     // return this.authService.refreshToken(data.refreshToken);
-    return { success: true, accessToken: 'new-token-xyz' }; 
+    return this.authService.refreshAccessToken(data.refreshToken);
   }
 }

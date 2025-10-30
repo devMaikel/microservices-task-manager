@@ -11,8 +11,16 @@ async function bootstrap() {
     .setTitle('API - Task Manager Microservices')
     .setDescription('Documentação da API para clientes externos.')
     .setVersion('0.1')
+    .addTag('auth')
     .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', in: 'header' },
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        description: 'Entre com o Bearer Token',
+        name: 'JWT',
+      },
       'access-token',
     )
     .build();

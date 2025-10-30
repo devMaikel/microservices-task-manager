@@ -8,18 +8,18 @@ import {
 } from 'class-validator';
 
 export class LoginUserDto {
-  @IsEmail({}, { message: 'Email must be a valid email address' })
-  @MaxLength(255, { message: 'Email is too long' })
+  @IsEmail({}, { message: 'Informe um e-mail válido' })
+  @MaxLength(255, { message: 'O e-mail deve ter no máximo 255 caracteres' })
   @ApiProperty({
     description: 'Email do usuário.',
     example: 'joaosilva@gmail.com',
   })
   email!: string;
 
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password is required' })
-  @MinLength(6, { message: 'Password must be at least 6 characters' })
-  @MaxLength(128, { message: 'Password is too long' })
+  @IsString({ message: 'A senha deve ser uma string' })
+  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  @MinLength(6, { message: 'A senha deve ter pelo menos 6 caracteres' })
+  @MaxLength(128, { message: 'A senha deve ter no máximo 128 caracteres' })
   @ApiProperty({ description: 'Senha do usuário.', example: 'coxinha123' })
   password!: string;
 }
