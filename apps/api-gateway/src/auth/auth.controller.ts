@@ -15,7 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('auth')
 export class AuthController {
   constructor(
-    @Inject('AUTH_SERVICE') private readonly clientProxy: ClientProxy,
+    @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
   ) {}
 
   @ApiOperation({ summary: 'Cadastro de um novo usuário.' })
@@ -28,7 +28,7 @@ export class AuthController {
   @Post('register')
   async registerUser(@Body() newUserData: RegisterUserDto) {
     const payload = { ...newUserData };
-    return this.clientProxy.send({ cmd: 'register_user' }, payload);
+    return this.authClient.send({ cmd: 'register_user' }, payload);
   }
 
   @ApiOperation({ summary: 'Login de usuário.' })
@@ -41,7 +41,7 @@ export class AuthController {
   @Post('login')
   async loginUser(@Body() loginUserData: LoginUserDto) {
     const payload = { ...loginUserData, timestamp: new Date() };
-    return this.clientProxy.send({ cmd: 'login_user' }, payload);
+    return this.authClient.send({ cmd: 'login_user' }, payload);
   }
 
   @ApiOperation({
@@ -61,6 +61,6 @@ export class AuthController {
   @Post('refresh')
   async createTask(@Body() refreshToken: RefreshTokenDto) {
     const payload = { ...refreshToken, timestamp: new Date() };
-    return this.clientProxy.send({ cmd: 'refresh_token' }, payload);
+    return this.authClient.send({ cmd: 'refresh_token' }, payload);
   }
 }
