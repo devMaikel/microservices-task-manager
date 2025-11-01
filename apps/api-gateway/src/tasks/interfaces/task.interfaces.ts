@@ -15,7 +15,6 @@ export interface Task {
 
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date;
 }
 
 export interface TaskComment {
@@ -25,7 +24,6 @@ export interface TaskComment {
   content: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date;
 }
 
 export interface TaskHistory {

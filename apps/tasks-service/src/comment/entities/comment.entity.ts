@@ -1,3 +1,5 @@
+import { Exclude } from 'class-transformer';
+import { Task } from '../../task/entities/task.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,7 +10,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Task } from '../task/task.entity';
 
 @Entity('task_comments')
 export class Comment {
@@ -34,6 +35,7 @@ export class Comment {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  @Exclude()
   @DeleteDateColumn()
   deletedAt?: Date;
 }

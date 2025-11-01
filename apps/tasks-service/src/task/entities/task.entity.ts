@@ -7,9 +7,10 @@ import {
   DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
-import { TaskStatus, TaskPriority } from '../common/enums/task.enum';
-import { Comment } from '../comment/comment.entity';
-import { TaskHistory } from '../history/task-history.entity';
+import { TaskStatus, TaskPriority } from '../../common/enums/task.enum';
+import { Comment } from '../../comment/entities/comment.entity';
+import { TaskHistory } from './task-history.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('tasks')
 export class Task {
@@ -49,6 +50,7 @@ export class Task {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  @Exclude()
   @DeleteDateColumn()
   deletedAt?: Date;
 }

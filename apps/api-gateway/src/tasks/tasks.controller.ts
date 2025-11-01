@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
@@ -55,7 +56,6 @@ export class TasksController {
 
     const payload = { page: pageNum, size: sizeNum };
     console.log('[API Gateway] Enviando mensagem para list_tasks:', payload);
-    this.taskClient.emit('ping', { message: 'olá' });
     return this.taskClient.send({ cmd: 'list_tasks' }, payload);
   }
 
@@ -64,7 +64,7 @@ export class TasksController {
   @ApiResponse({ status: 200, description: 'Tarefa encontrada.' })
   @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
   @Get(':id')
-  async getTaskById(@Param('id') id: string) {
+  async getTaskById(@Param('id', ParseUUIDPipe) id: string) {
     return this.taskClient.send({ cmd: 'get_task_by_id' }, id);
   }
 
@@ -94,7 +94,7 @@ export class TasksController {
   @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
   @Put(':id')
   async updateTask(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTaskDto: UpdateTaskDto,
     @Req() req: AuthenticatedRequest,
   ) {
@@ -109,6 +109,30 @@ export class TasksController {
     return this.taskClient.send({ cmd: 'update_task' }, payload);
   }
 
+  @ApiOperation({ summary: 'Lista os comentários de uma tarefa com paginação.' })
+  @ApiParam({ name: 'id', description: 'ID da tarefa (UUID)', type: 'string' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página' })
+  @ApiQuery({ name: 'size', required: false, type: Number, description: 'Tamanho da página' })
+  @ApiResponse({ status: 200, description: 'Lista de comentários paginada.' })
+  @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
+  @Get(':id/comments')
+  async listComments(
+    @Param('id', ParseUUIDPipe) taskId: string,
+    @Query('page') page: string = '1',
+    @Query('size') size: string = '10',
+  ) {
+    const pageNum = parseInt(page, 10);
+    const sizeNum = parseInt(size, 10);
+
+    const payload = {
+      taskId: taskId,
+      page: pageNum,
+      size: sizeNum,
+    };
+
+    return this.taskClient.send({ cmd: 'list_task_comments' }, payload);
+  }
+
   @ApiOperation({ summary: 'Adiciona um novo comentário a uma tarefa.' })
   @ApiParam({ name: 'id', description: 'ID da tarefa (UUID)', type: 'string' })
   @ApiResponse({
@@ -118,7 +142,7 @@ export class TasksController {
   @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
   @Post(':id/comments')
   async createComment(
-    @Param('id') taskId: string,
+    @Param('id', ParseUUIDPipe) taskId: string,
     @Body() createCommentDto: CreateCommentDto,
     @Req() req: AuthenticatedRequest,
   ) {

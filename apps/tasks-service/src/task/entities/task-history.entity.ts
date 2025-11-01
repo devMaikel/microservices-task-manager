@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Task } from '../task/task.entity';
+import { Task } from './task.entity';
 
 @Entity('task_history')
 export class TaskHistory {

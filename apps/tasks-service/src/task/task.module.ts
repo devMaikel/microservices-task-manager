@@ -2,15 +2,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule } from 'src/database/database.module';
 import { TaskService } from './task.service';
-import { Task } from './task.entity';
-import { TaskHistory } from 'src/history/task-history.entity';
+import { TaskHistory } from 'src/task/entities/task-history.entity';
 import { TaskController } from './task.controller';
-import { Comment } from 'src/comment/comment.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
+import { CommentModule } from 'src/comment/comment.module';
+import { Task } from './entities/task.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Task, TaskHistory, Comment]),
     DatabaseModule,
+    CommentModule
   ],
   controllers: [TaskController],
   providers: [TaskService],

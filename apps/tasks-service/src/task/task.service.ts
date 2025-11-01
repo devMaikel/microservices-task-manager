@@ -2,21 +2,13 @@ import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PaginationDto } from './dto/pagination.dto';
-import { TaskHistory } from '../history/task-history.entity';
+import { TaskHistory } from './entities/task-history.entity';
 import { TaskStatus } from '../common/enums/task.enum';
-import { PaginatedTasks } from './interfaces/task.interfaces';
+import { PaginatedTasks, TaskDiff } from './interfaces/task.interfaces';
 import { UpdateTaskPayload } from './dto/update-task.payload';
-import { Comment } from '../comment/comment.entity';
-import { CreateCommentPayload } from './dto/create-comment.payload';
-
-interface TaskDiff {
-  field: string;
-  oldValue: string;
-  newValue: string;
-}
+import { Task } from './entities/task.entity';
 
 @Injectable()
 export class TaskService {
@@ -25,8 +17,6 @@ export class TaskService {
     private taskRepository: Repository<Task>,
     @InjectRepository(TaskHistory)
     private historyRepository: Repository<TaskHistory>,
-    @InjectRepository(Comment)
-    private commentRepository: Repository<Comment>,
     // @Inject('RABBITMQ_CLIENT') private readonly rabbitClient: ClientProxy,
     private dataSource: DataSource,
   ) {}
@@ -34,7 +24,7 @@ export class TaskService {
   private async registerCreationHistory(
     taskId: string,
     creatorId: string,
-    manager: any = this.historyRepository, // Permite transação
+    manager: any = this.historyRepository,
   ): Promise<void> {
     const history = manager.create(TaskHistory, {
       taskId,
@@ -166,28 +156,18 @@ export class TaskService {
     const { page = 1, size = 10 } = pagination;
     const skip = (page - 1) * size;
 
-    const query = this.taskRepository.createQueryBuilder('task');
-
-    query
-      .leftJoin('task.comments', 'comment')
-      .addSelect('COUNT(comment.id)', 'commentCount')
-      .groupBy('task.id')
-      .take(size)
-      .skip(skip)
-      .orderBy('task.createdAt', 'DESC');
-
-    const [tasksWithCount, total] = await Promise.all([
-      query.getManyAndCount(),
-      this.taskRepository.count(),
-    ]);
-
-    const data = tasksWithCount[0].map((task: any) => ({
-      ...task,
-      commentCount: parseInt(task.commentCount, 10) || 0,
-    }));
+    // Usar 'findAndCount' é a forma mais idiomática e limpa para
+    // paginação simples, sem a necessidade de QueryBuilder.
+    // Ele executa as duas queries necessárias (SELECT com LIMIT/OFFSET e COUNT total).
+    const [tasks, total] = await this.taskRepository.findAndCount({
+      take: size,
+      skip: skip,
+      order: { createdAt: 'DESC' },
+      // O Soft-Delete (deletedAt IS NULL) é aplicado automaticamente aqui.
+    });
 
     return {
-      data,
+      data: tasks,
       total: total,
       page,
       size,
@@ -259,52 +239,6 @@ export class TaskService {
       throw new RpcException({
         statusCode: 500,
         message: `Failed to update task: ${error.message}`,
-      });
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  async createComment(payload: CreateCommentPayload): Promise<Comment> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const { taskId, userId, content } = payload;
-
-      const task = await queryRunner.manager.findOne(Task, {
-        where: { id: taskId },
-      });
-      if (!task) {
-        throw new RpcException({
-          statusCode: 404,
-          message: `Task with ID ${taskId} not found.`,
-        });
-      }
-
-      const comment = this.commentRepository.create({
-        taskId,
-        userId,
-        content,
-      });
-      const savedComment = await queryRunner.manager.save(comment);
-
-      await queryRunner.commitTransaction();
-
-      // this.rabbitClient.emit('task.comment.created', {
-      //   taskId: taskId,
-      //   commentId: savedComment.id,
-      //   userId: userId,
-      //   content: content,
-      // });
-
-      return savedComment;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw new RpcException({
-        statusCode: 500,
-        message: `Failed to create comment: ${error.message}`,
       });
     } finally {
       await queryRunner.release();
