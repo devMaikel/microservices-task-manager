@@ -1,9 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router'
+import type { SignInFormSchema } from "@/components/auth/Schemas";
+import { SigninForm } from "@/components/auth/SigninForm";
+import { useAuth } from "@/hooks/useAuth";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_auth/sign-in')({
+export const Route = createFileRoute("/_auth/sign-in")({
   component: SignIn,
-})
+});
 
 function SignIn() {
-  return <div>Hello "/_auth/sign-in"!</div>
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (data: SignInFormSchema) => {
+    try {
+      await signIn(data.email, data.password);
+      alert("Login bem-sucedido!");
+      navigate({ to: "/tasks" });
+    } catch (err) {
+      console.log("erro login: ", err);
+      alert("Erro ao fazer login.");
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+      <SigninForm onSubmit={handleSubmit} />
+    </div>
+  );
 }

@@ -1,5 +1,7 @@
-import { createRootRoute, Outlet, Link } from '@tanstack/react-router';
+import { createRootRoute, Outlet, Link } from "@tanstack/react-router";
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools';
+
+// ... (imports)
 
 export const Route = createRootRoute({
   component: () => (
@@ -9,26 +11,23 @@ export const Route = createRootRoute({
           <Link to="/" className="[&.active]:font-bold text-blue-600">
             Home
           </Link>
-          <br/>
-          <Link to="/about" className="[&.active]:font-bold text-blue-600">
-            Sobre
-          </Link>
-          <br/>
+          {/* Removendo links não necessários para o fluxo principal (sobre) */}
+
           <Link to="/sign-in" className="[&.active]:font-bold text-blue-600">
-            sign-in
+            Entrar
           </Link>
-          <br/>
+
           <Link to="/sign-up" className="[&.active]:font-bold text-blue-600">
-            sign-up
+            Registrar
           </Link>
-          <br/>
-          {/* <Link to="/tasks/37" className="[&.active]:font-bold text-blue-600">
-            taskId
-          </Link> */}
+
+          {/* Link de Exemplo para Tasks (se logado) */}
+          <Link to="/tasks" className="[&.active]:font-bold text-blue-600">
+            Tarefas
+          </Link>
         </nav>
       </header>
-      <br/><br/>
-      <main className="p-4">
+      <main className="flex-grow">
         <Outlet />
       </main>
       {/* <TanStackRouterDevtools initialIsOpen={true}/> */}
