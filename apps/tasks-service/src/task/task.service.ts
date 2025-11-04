@@ -1,14 +1,19 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, Like, FindOptionsWhere, ILike } from 'typeorm';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { TaskHistory } from './entities/task-history.entity';
 import { TaskStatus } from '../common/enums/task.enum';
-import { PaginatedTasks, TaskDiff } from './interfaces/task.interfaces';
+import {
+  DeleteTaskPayload,
+  PaginatedTasks,
+  TaskDiff,
+} from './interfaces/task.interfaces';
 import { UpdateTaskPayload } from './dto/update-task.payload';
 import { Task } from './entities/task.entity';
+import { ListTasksDto } from './dto/list-tasks-dto';
 
 @Injectable()
 export class TaskService {
@@ -152,18 +157,25 @@ export class TaskService {
     }
   }
 
-  async getTasks(pagination: PaginationDto): Promise<PaginatedTasks> {
-    const { page = 1, size = 10 } = pagination;
+  async getTasks(filters: ListTasksDto): Promise<PaginatedTasks> {
+    const { page = 1, size = 10, title, status } = filters;
     const skip = (page - 1) * size;
 
-    // Usar 'findAndCount' é a forma mais idiomática e limpa para
-    // paginação simples, sem a necessidade de QueryBuilder.
-    // Ele executa as duas queries necessárias (SELECT com LIMIT/OFFSET e COUNT total).
+    const where: FindOptionsWhere<Task> = {};
+
+    if (title) {
+      where.title = ILike(`%${title}%`);
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
     const [tasks, total] = await this.taskRepository.findAndCount({
+      where,
       take: size,
       skip: skip,
       order: { createdAt: 'DESC' },
-      // O Soft-Delete (deletedAt IS NULL) é aplicado automaticamente aqui.
     });
 
     return {
@@ -239,6 +251,52 @@ export class TaskService {
       throw new RpcException({
         statusCode: 500,
         message: `Failed to update task: ${error.message}`,
+      });
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteTask(payload: DeleteTaskPayload): Promise<{ message: string }> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const task = await queryRunner.manager.findOne(Task, {
+        where: { id: payload.taskId },
+      });
+
+      if (!task) {
+        throw new RpcException({
+          statusCode: 404,
+          message: `Task with ID ${payload.taskId} not found.`,
+        });
+      }
+
+      await queryRunner.manager.softRemove(Task, task);
+
+      const history = queryRunner.manager.create(TaskHistory, {
+        taskId: payload.taskId,
+        userId: payload.userId,
+        field: 'task',
+        oldValue: task.title ?? 'UNKNOWN',
+        newValue: 'DELETED',
+      });
+      await queryRunner.manager.save(history);
+
+      await queryRunner.commitTransaction();
+
+      // this.rabbitClient.emit('task.deleted', { taskId: id, userId });
+
+      return {
+        message: `Task with ID ${payload.taskId} deleted successfully.`,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new RpcException({
+        statusCode: 500,
+        message: `Failed to delete task: ${error.message}`,
       });
     } finally {
       await queryRunner.release();

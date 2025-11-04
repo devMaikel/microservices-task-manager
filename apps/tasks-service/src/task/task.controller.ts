@@ -4,17 +4,19 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateTaskPayload } from './dto/update-task.payload';
+import { DeleteTaskPayload } from './interfaces/task.interfaces';
+import { ListTasksDto } from './dto/list-tasks-dto';
 
 @Controller()
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @MessagePattern({ cmd: 'list_tasks' })
-  async handleListTasks(@Payload() pagination: PaginationDto) {
+  async handleListTasks(@Payload() filters: ListTasksDto) {
     console.log(
-      `[TaskController] Recebendo comando wa 'list_tasks' para página ${pagination.page}`,
+      `[TaskController] Recebendo comando wa 'list_tasks' para página ${filters.page}`,
     );
-    return this.taskService.getTasks(pagination);
+    return this.taskService.getTasks(filters);
   }
 
   @MessagePattern({ cmd: 'get_task_by_id' })
@@ -39,5 +41,13 @@ export class TaskController {
       `[TaskController] Recebendo comando 'update_task' para ID ${payload.id}`,
     );
     return this.taskService.updateTask(payload);
+  }
+
+  @MessagePattern({ cmd: 'delete_task' })
+  async handleDeleteTask(@Payload() payload: DeleteTaskPayload) {
+    console.log(
+      `[TaskController] Recebendo comando 'delete_task' para ID ${payload.taskId}`,
+    );
+    return this.taskService.deleteTask(payload);
   }
 }

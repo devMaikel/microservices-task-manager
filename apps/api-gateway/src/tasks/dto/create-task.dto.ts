@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsDateString, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 
 import { TaskStatus, TaskPriority } from '../../common/enums/task.enum';
 
@@ -49,6 +55,7 @@ export class CreateTaskDto {
   priority!: TaskPriority;
 
   @IsEnum(TaskStatus, { message: 'O status deve ser um valor válido.' })
+  @IsOptional()
   @ApiProperty({
     description:
       'Status inicial da tarefa (opcional, TaskService define TODO como padrão).',
@@ -57,5 +64,5 @@ export class CreateTaskDto {
     default: TaskStatus.TODO,
     required: false,
   })
-  status!: TaskStatus;
+  status?: TaskStatus;
 }

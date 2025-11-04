@@ -5,7 +5,7 @@ export class CreateTaskDto {
   description!: string;
   dueDate!: Date;
   priority!: TaskPriority;
-  status!: TaskStatus;
+  status?: TaskStatus;
   creatorId!: string;
 
   assignedUserIds: string[] = [];

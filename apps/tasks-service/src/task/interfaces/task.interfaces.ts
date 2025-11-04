@@ -1,4 +1,4 @@
-import { Task } from "../entities/task.entity";
+import { Task } from '../entities/task.entity';
 
 export interface PaginatedTasks {
   data: Task[];
@@ -11,4 +11,9 @@ export interface TaskDiff {
   field: string;
   oldValue: string;
   newValue: string;
+}
+
+export interface DeleteTaskPayload {
+  taskId: string;
+  userId: string;
 }

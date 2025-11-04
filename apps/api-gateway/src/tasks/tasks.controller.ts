@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
   ParseUUIDPipe,
+  Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,6 +26,8 @@ import {
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { ListTasksDto } from './dto/list-tasks-dto';
+import { TaskStatus } from 'src/common/enums/task.enum';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -43,18 +46,28 @@ export class TasksController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lista tarefas com paginação.' })
+  @ApiOperation({ summary: 'Lista tarefas com paginação e filtros.' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'size', required: false, type: Number })
+  @ApiQuery({ name: 'title', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Lista de tarefas e metadados.' })
   async listTasks(
     @Query('page') page: string = '1',
     @Query('size') size: string = '10',
+    @Query('title') title?: string,
+    @Query('status') status?: TaskStatus,
   ) {
     const pageNum = parseInt(page, 10);
     const sizeNum = parseInt(size, 10);
 
-    const payload = { page: pageNum, size: sizeNum };
+    const payload: ListTasksDto = {
+      page: pageNum,
+      size: sizeNum,
+      ...(title && { title }),
+      ...(status && { status }),
+    };
+
     console.log('[API Gateway] Enviando mensagem para list_tasks:', payload);
     return this.taskClient.send({ cmd: 'list_tasks' }, payload);
   }
@@ -109,10 +122,41 @@ export class TasksController {
     return this.taskClient.send({ cmd: 'update_task' }, payload);
   }
 
-  @ApiOperation({ summary: 'Lista os comentários de uma tarefa com paginação.' })
+  @ApiOperation({ summary: 'Deleta uma tarefa pelo ID.' })
   @ApiParam({ name: 'id', description: 'ID da tarefa (UUID)', type: 'string' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página' })
-  @ApiQuery({ name: 'size', required: false, type: Number, description: 'Tamanho da página' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tarefa deletada com sucesso.',
+  })
+  @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
+  @Delete(':id')
+  async deleteTask(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user.userId;
+
+    const payload = { taskId: id, userId };
+
+    return this.taskClient.send({ cmd: 'delete_task' }, payload);
+  }
+
+  @ApiOperation({
+    summary: 'Lista os comentários de uma tarefa com paginação.',
+  })
+  @ApiParam({ name: 'id', description: 'ID da tarefa (UUID)', type: 'string' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página',
+  })
+  @ApiQuery({
+    name: 'size',
+    required: false,
+    type: Number,
+    description: 'Tamanho da página',
+  })
   @ApiResponse({ status: 200, description: 'Lista de comentários paginada.' })
   @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
   @Get(':id/comments')
