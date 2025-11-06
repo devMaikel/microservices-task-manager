@@ -5,7 +5,10 @@ import { Comment } from './entities/comment.entity';
 import { CreateCommentPayload } from './dto/create-comment.payload';
 import { RpcException } from '@nestjs/microservices';
 import { Task } from 'src/task/entities/task.entity';
-import { ListCommentsPayload, PaginatedComments } from './interfaces/task.interfaces';
+import {
+  ListCommentsPayload,
+  PaginatedComments,
+} from './interfaces/task.interfaces';
 
 @Injectable()
 export class CommentService {
@@ -67,7 +70,9 @@ export class CommentService {
     const { taskId, page = 1, size = 10 } = payload;
     const skip = (page - 1) * size;
 
-    const taskExists = await this.dataSource.manager.findOne(Task, { where: { id: taskId } });
+    const taskExists = await this.dataSource.manager.findOne(Task, {
+      where: { id: taskId },
+    });
     if (!taskExists) {
       throw new RpcException({
         statusCode: 404,
@@ -77,6 +82,7 @@ export class CommentService {
 
     const [comments, total] = await this.commentRepository.findAndCount({
       where: { taskId: taskId },
+      relations: ['author'],
       take: size,
       skip: skip,
       order: { createdAt: 'DESC' },

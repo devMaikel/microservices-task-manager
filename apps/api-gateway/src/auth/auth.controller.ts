@@ -63,4 +63,13 @@ export class AuthController {
     const payload = { ...refreshToken, timestamp: new Date() };
     return this.authClient.send({ cmd: 'refresh_token' }, payload);
   }
+
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Lista todos os usuários (id, name, email).' })
+  @ApiResponse({ status: 200, description: 'Lista de usuários carregada com sucesso.' })
+  @Get('users')
+  async listUsers() {
+    return this.authClient.send({ cmd: 'get_users' }, {});
+  }
 }

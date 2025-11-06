@@ -8,12 +8,17 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { User } from 'src/user/user.entity';
-import { AuthTokens, JwtPayload } from './interfaces/auth.interfaces';
+import { User } from 'src/user/entities/user.entity';
+import {
+  AuthTokens,
+  IAuthResponse,
+  JwtPayload,
+} from './interfaces/auth.interfaces';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RefreshToken } from './refresh-token.entity';
 import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
+import { UserBasic } from 'src/user/interfaces/user-basic.interface';
 
 @Injectable()
 export class AuthService {
@@ -72,7 +77,7 @@ export class AuthService {
     return { ...result, ...tokens };
   }
 
-  async login(loginDto: LoginUserDto): Promise<{ accessToken: string }> {
+  async login(loginDto: LoginUserDto): Promise<IAuthResponse> {
     const userWithPassword = await this.userService.findByEmail(loginDto.email);
 
     if (
@@ -91,8 +96,8 @@ export class AuthService {
     );
 
     const tokens = await this.getTokens(userWithPassword);
-
-    return tokens;
+    const { password, createdAt, ...userWithoutPassword } = userWithPassword;
+    return { ...tokens, ...userWithoutPassword };
   }
 
   async refreshAccessToken(oldRefreshToken: string): Promise<AuthTokens> {
@@ -142,5 +147,10 @@ export class AuthService {
     const tokens = await this.getTokens(user);
 
     return tokens;
+  }
+
+  async getAllUsers(): Promise<UserBasic[]> {
+    const users = await this.userService.findAllBasic();
+    return users;
   }
 }

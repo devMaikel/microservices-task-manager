@@ -2,8 +2,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import api from "./api";
 import type {
-	PaginatedTasksResponse,
-	Task,
+  PaginatedTasksResponse,
+  Task,
+  PaginatedCommentsResponse,
+  CreateCommentData,
 } from "@/routes/_protected/tasks/interfaces";
 import type { CreateTaskPayload, UpdateTaskData } from "./interfaces";
 
@@ -73,15 +75,56 @@ const deleteTask = async (taskId: string): Promise<void> => {
 };
 
 export const useDeleteTask = () => {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: deleteTask,
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["tasks"] });
-			toast.success("Tarefa excluída com sucesso!");
-		},
-		onError: (err: Error) => {
-			toast.error(`Falha ao excluir tarefa: ${err.message}`);
-		},
-	});
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa excluída com sucesso!");
+    },
+    onError: (err: Error) => {
+      toast.error(`Falha ao excluir tarefa: ${err.message}`);
+    },
+  });
+};
+
+// ========================
+// Detalhes da Task & Comentários
+// ========================
+
+export const fetchTaskById = async (taskId: string): Promise<Task> => {
+  const response = await api.get(`/tasks/${taskId}`);
+  return response.data;
+};
+
+export const fetchTaskComments = async (
+  taskId: string,
+  page = 1,
+  size = 10
+): Promise<PaginatedCommentsResponse> => {
+  const response = await api.get(`/tasks/${taskId}/comments`, {
+    params: { page, size },
+  });
+  return response.data;
+};
+
+const createComment = async ({ taskId, content }: CreateCommentData) => {
+  const response = await api.post(`/tasks/${taskId}/comments`, { content });
+  return response.data as { id: string };
+};
+
+export const useCreateComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createComment,
+    onSuccess: (_result, variables) => {
+      // Atualiza lista de comentários e detalhes da tarefa
+      queryClient.invalidateQueries({ queryKey: ["comments", variables.taskId] });
+      queryClient.invalidateQueries({ queryKey: ["task", variables.taskId] });
+      toast.success("Comentário adicionado!");
+    },
+    onError: (err: Error) => {
+      toast.error(`Falha ao comentar: ${err.message}`);
+    },
+  });
 };

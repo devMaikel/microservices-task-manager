@@ -1,4 +1,5 @@
 import api from "./api";
+import type { UserBasic } from "./interfaces";
 
 export async function login(email: string, password: string) {
   const { data } = await api.post("/auth/login", { email, password });
@@ -29,4 +30,9 @@ export async function refreshToken() {
 export function logout() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+}
+
+export async function fetchUsers(): Promise<UserBasic[]> {
+  const { data } = await api.get("/auth/users");
+  return data as UserBasic[];
 }

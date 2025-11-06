@@ -29,4 +29,10 @@ export class AuthController {
     this.logger.log(`Recebendo comando 'refresh_token'`);
     return this.authService.refreshAccessToken(data.refreshToken);
   }
+
+  @MessagePattern({ cmd: 'get_users' })
+  async handleGetUsers() {
+    this.logger.log(`Recebendo comando 'get_users'`);
+    return this.authService.getAllUsers();
+  }
 }

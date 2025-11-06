@@ -11,10 +11,40 @@ export interface Task {
 	priority: TaskPriority;
 	dueDate: string;
 	description: string;
+	comments: TaskComment[];
+	creatorId?: string;
+	assignedUserIds?: string[];
+	commentCount?: number;
+	createdAt?: string;
+	updatedAt?: string;
 }
 
 export interface PaginatedTasksResponse {
 	data: Task[];
+	total: number;
+	page: number;
+	size: number;
+}
+
+export interface TaskComment {
+	id: string;
+	taskId: string;
+	author: CommentAuthor;
+	content: string;
+	createdAt: string;
+	updatedAt?: string;
+}
+
+export interface CommentAuthor {
+	id: string;
+	name: string;
+	email: string;
+	createdAt: string;
+	updatedAt?: string;
+}
+
+export interface PaginatedCommentsResponse {
+	data: TaskComment[];
 	total: number;
 	page: number;
 	size: number;
@@ -38,3 +68,8 @@ export interface TaskFormProps {
 }
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
+
+export interface CreateCommentData {
+	taskId: string;
+	content: string;
+}

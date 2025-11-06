@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Task } from '../../task/entities/task.entity';
+import { Task } from './task.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

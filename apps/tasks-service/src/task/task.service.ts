@@ -189,7 +189,7 @@ export class TaskService {
   async getTaskById(id: string): Promise<Task> {
     const task = await this.taskRepository.findOne({
       where: { id },
-      relations: ['comments', 'history'],
+      relations: ['comments', 'history', 'comments.author'],
     });
 
     if (!task) {

@@ -13,6 +13,17 @@ export function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
 		URGENT: "destructive",
 	};
 
+	const PRIORITY_CONFIG = {
+		LOW: { label: "Baixa", variant: "secondary" },
+		MEDIUM: { label: "Média", variant: "default" },
+		HIGH: { label: "Alta", variant: "outline" },
+		URGENT: {
+			label: "Urgente",
+			variant: "default",
+			className: "border-yellow-500 text-yellow-600",
+		},
+	};
+
 	const highClass =
 		priority === "HIGH" ? "border-yellow-500 text-yellow-600" : "";
 
@@ -21,7 +32,7 @@ export function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
 			variant={variantMap[priority]}
 			className={cn(highClass, "capitalize")}
 		>
-			{priority.toLowerCase()}
+			{PRIORITY_CONFIG[priority].label}
 		</Badge>
 	);
 }

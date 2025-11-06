@@ -7,3 +7,11 @@ export interface JwtPayload {
   email: string;
   sub: string;
 }
+
+export interface IAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  id: string;
+  name: string;
+  email: string;
+}
