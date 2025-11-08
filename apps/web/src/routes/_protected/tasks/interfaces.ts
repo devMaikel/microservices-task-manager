@@ -5,18 +5,19 @@ export type TaskStatus = "TODO" | "IN_PROGRESS" | "REVIEW" | "DONE";
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 export interface Task {
-	id: string;
-	title: string;
-	status: TaskStatus;
-	priority: TaskPriority;
-	dueDate: string;
-	description: string;
-	comments: TaskComment[];
-	creatorId?: string;
-	assignedUserIds?: string[];
-	commentCount?: number;
-	createdAt?: string;
-	updatedAt?: string;
+  id: string;
+  title: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: string;
+  description: string;
+  comments: TaskComment[];
+  creatorId?: string;
+  assignedUserIds?: string[];
+  commentCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  author?: CommentAuthor;
 }
 
 export interface PaginatedTasksResponse {

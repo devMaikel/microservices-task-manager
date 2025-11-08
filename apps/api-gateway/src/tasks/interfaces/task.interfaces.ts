@@ -8,6 +8,14 @@ export interface Task {
   creatorId: string;
   assignedUserIds: string[];
 
+  author?: {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+
   comments?: TaskComment[];
   history?: TaskHistory[];
 

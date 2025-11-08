@@ -123,8 +123,12 @@ export const useCreateComment = () => {
       queryClient.invalidateQueries({ queryKey: ["task", variables.taskId] });
       toast.success("Comentário adicionado!");
     },
-    onError: (err: Error) => {
-      toast.error(`Falha ao comentar: ${err.message}`);
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Falha ao comentar.";
+      toast.error(message);
     },
   });
 };

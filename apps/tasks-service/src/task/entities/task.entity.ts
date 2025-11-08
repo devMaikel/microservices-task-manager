@@ -6,11 +6,14 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { TaskStatus, TaskPriority } from '../../common/enums/task.enum';
 import { Comment } from '../../comment/entities/comment.entity';
 import { TaskHistory } from './task-history.entity';
 import { Exclude } from 'class-transformer';
+import { User } from '../../comment/entities/user.entity';
 
 @Entity('tasks')
 export class Task {
@@ -34,6 +37,10 @@ export class Task {
 
   @Column({ type: 'uuid' })
   creatorId!: string;
+
+  @ManyToOne(() => User, (user) => user.tasks)
+  @JoinColumn({ name: 'creatorId' })
+  author!: User;
 
   @Column('uuid', { array: true, default: [] })
   assignedUserIds!: string[];

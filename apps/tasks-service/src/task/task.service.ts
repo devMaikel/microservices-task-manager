@@ -173,6 +173,7 @@ export class TaskService {
 
     const [tasks, total] = await this.taskRepository.findAndCount({
       where,
+      relations: ['author'],
       take: size,
       skip: skip,
       order: { createdAt: 'DESC' },
@@ -189,7 +190,7 @@ export class TaskService {
   async getTaskById(id: string): Promise<Task> {
     const task = await this.taskRepository.findOne({
       where: { id },
-      relations: ['comments', 'history', 'comments.author'],
+      relations: ['comments', 'history', 'comments.author', 'author'],
     });
 
     if (!task) {
@@ -218,6 +219,13 @@ export class TaskService {
         throw new RpcException({
           statusCode: 404,
           message: `Task with ID ${id} not found.`,
+        });
+      }
+
+      if (oldTask.creatorId !== userId) {
+        throw new RpcException({
+          statusCode: 403,
+          message: `User ${userId} is not authorized to update task ${id}.`,
         });
       }
 
@@ -271,6 +279,13 @@ export class TaskService {
         throw new RpcException({
           statusCode: 404,
           message: `Task with ID ${payload.taskId} not found.`,
+        });
+      }
+
+      if (task.creatorId !== payload.userId) {
+        throw new RpcException({
+          statusCode: 403,
+          message: `User ${payload.userId} is not authorized to delete task ${payload.taskId}.`,
         });
       }
 

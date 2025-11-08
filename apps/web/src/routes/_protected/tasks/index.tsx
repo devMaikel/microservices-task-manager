@@ -3,13 +3,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
 	Pagination,
 	PaginationContent,
@@ -123,76 +124,92 @@ function TaskListPage() {
 				</div>
 			</div>
 
-			<div className="rounded-lg border shadow-sm">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead className="w-[400px]">Tarefa</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Prioridade</TableHead>
-							<TableHead>Prazo</TableHead>
-							<TableHead className="text-right">Ações</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{isLoading && (
-							<TableRow>
-								<TableCell colSpan={5} className="h-24 text-center">
-									Carregando novos dados...
-								</TableCell>
-							</TableRow>
-						)}
-						{!isLoading && data && data.data.length === 0 && (
-							<TableRow>
-								<TableCell
-									colSpan={5}
-									className="h-24 text-center text-muted-foreground"
-								>
-									Nenhuma tarefa encontrada com os filtros aplicados.
-								</TableCell>
-							</TableRow>
-						)}
-						{!isLoading && data && data.data.length > 0 ? (
-							data.data.map((task) => (
-								<TableRow key={task.id}>
-									<TableCell className="font-medium">
-										<Link
-											to="/tasks/$taskId"
-											params={{ taskId: task.id }}
-											className="hover:underline"
-										>
-											{task.title}
-										</Link>
-									</TableCell>
-									<TableCell>
-										<TaskStatusBadge status={task.status} />
-									</TableCell>
-									<TableCell>
-										<TaskPriorityBadge priority={task.priority} />
-									</TableCell>
-									<TableCell>
-										{new Date(task.dueDate).toLocaleDateString("pt-BR", {
-											timeZone: "UTC",
-										})}
-									</TableCell>
-									<TableCell className="text-right">
-										<TaskActionsDropdown task={task} />
-									</TableCell>
-								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={5}
-									className="h-24 text-center text-muted-foreground"
-								>
-									Nenhuma tarefa encontrada.
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
+            <div className="rounded-lg border shadow-sm">
+                <Table>
+                    <TableHeader className="sticky top-0 z-10 bg-muted/50">
+                        <TableRow>
+                            <TableHead className="w-[380px] font-semibold">Tarefa</TableHead>
+                            <TableHead className="font-semibold">Autor</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">Prioridade</TableHead>
+                            <TableHead className="font-semibold">Prazo</TableHead>
+                            <TableHead className="text-right font-semibold">Ações</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading && (
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    Carregando novos dados...
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {!isLoading && data && data.data.length === 0 && (
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell
+                                    colSpan={6}
+                                    className="h-24 text-center text-muted-foreground"
+                                >
+                                    Nenhuma tarefa encontrada com os filtros aplicados.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {!isLoading && data && data.data.length > 0 ? (
+                            data.data.map((task, idx) => (
+                                <TableRow
+                                    key={task.id}
+                                    className={cn(
+                                        "hover:bg-muted/40",
+                                        idx % 2 === 0 ? "bg-background" : "bg-muted/20"
+                                    )}
+                                >
+                                    <TableCell className="font-medium">
+                                        <Link
+                                            to="/tasks/$taskId"
+                                            params={{ taskId: task.id }}
+                                            className="hover:underline"
+                                        >
+                                            {task.title}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell>
+                                        {task.author?.name ? (
+                                            <Badge variant="outline" className="font-normal">
+                                                {task.author.name}
+                                            </Badge>
+                                        ) : (
+                                            <span className="text-muted-foreground">—</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <TaskStatusBadge status={task.status} />
+                                    </TableCell>
+                                    <TableCell>
+                                        <TaskPriorityBadge priority={task.priority} />
+                                    </TableCell>
+                                    <TableCell>
+                                        {new Date(task.dueDate).toLocaleDateString("pt-BR", {
+                                            timeZone: "UTC",
+                                        })}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <TaskActionsDropdown task={task} />
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell
+                                    colSpan={6}
+                                    className="h-24 text-center text-muted-foreground"
+                                >
+                                    Nenhuma tarefa encontrada.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
 			<Pagination>
 				<PaginationContent>

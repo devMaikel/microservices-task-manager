@@ -6,11 +6,11 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-	Pagination,
-	PaginationContent,
-	PaginationItem,
-	PaginationNext,
-	PaginationPrevious,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,63 +29,63 @@ import type { UserBasic } from "@/api/interfaces";
 import { useUpdateTask } from "@/api/tasks";
 
 export const Route = createFileRoute("/_protected/tasks/$taskId")({
-	component: TaskDetailPage,
+  component: TaskDetailPage,
 });
 
 function getUserIdFromToken(): string | null {
-	try {
-		const token = localStorage.getItem("accessToken");
-		if (!token) return null;
-		const payload = JSON.parse(atob(token.split(".")[1]));
-		return payload?.sub ?? null;
-	} catch {
-		return null;
-	}
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload?.sub ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function TaskDetailPage() {
-	const { taskId } = Route.useParams();
+  const { taskId } = Route.useParams();
 
-	const { user } = useAuth();
-	console.log("usheoa", user);
+  const { user } = useAuth();
+  console.log("usheoa", user);
 
-	const [commentsPage, setCommentsPage] = useState(1);
-	const pageSize = 10;
+  const [commentsPage, setCommentsPage] = useState(1);
+  const pageSize = 10;
 
-	const {
-		data: task,
-		isLoading: isTaskLoading,
-		isError: isTaskError,
-		error: taskError,
-	} = useQuery<Task, Error>({
-		queryKey: ["task", taskId],
-		queryFn: () => fetchTaskById(taskId),
-	});
+  const {
+    data: task,
+    isLoading: isTaskLoading,
+    isError: isTaskError,
+    error: taskError,
+  } = useQuery<Task, Error>({
+    queryKey: ["task", taskId],
+    queryFn: () => fetchTaskById(taskId),
+  });
 
-	const {
-		data: commentsData,
-		isLoading: isCommentsLoading,
-		isError: isCommentsError,
-		error: commentsError,
-		refetch: refetchComments,
-	} = useQuery<PaginatedCommentsResponse, Error>({
-		queryKey: ["comments", taskId, commentsPage],
-		queryFn: () => fetchTaskComments(taskId, commentsPage, pageSize),
-		placeholderData: (prev) => prev,
-	});
+  const {
+    data: commentsData,
+    isLoading: isCommentsLoading,
+    isError: isCommentsError,
+    error: commentsError,
+    refetch: refetchComments,
+  } = useQuery<PaginatedCommentsResponse, Error>({
+    queryKey: ["comments", taskId, commentsPage],
+    queryFn: () => fetchTaskComments(taskId, commentsPage, pageSize),
+    placeholderData: (prev) => prev,
+  });
 
-	console.log("emasn9ueuas data", commentsData);
+  console.log("emasn9ueuas data", commentsData);
 
-	useEffect(() => {
-		setCommentsPage(1);
-	}, [taskId]);
+  useEffect(() => {
+    setCommentsPage(1);
+  }, [taskId]);
 
-	const userId = useMemo(() => getUserIdFromToken(), []);
-	const canComment =
-		!!task &&
-		!!userId &&
-		(task.creatorId === userId ||
-			(task.assignedUserIds ?? []).includes(userId));
+  const userId = useMemo(() => getUserIdFromToken(), []);
+  const canComment =
+    !!task &&
+    !!userId &&
+    (task.creatorId === userId ||
+      (task.assignedUserIds ?? []).includes(userId));
 
   const { mutate: createComment, isPending: isCommenting } = useCreateComment();
   const [commentText, setCommentText] = useState("");
@@ -119,72 +119,77 @@ function TaskDetailPage() {
   const handleSaveAssignments = () => {
     if (!task) return;
     if (!isAuthor) return;
-    updateTask({ taskId: task.id, payload: { assignedUserIds: selectedUserIds } });
+    updateTask({
+      taskId: task.id,
+      payload: { assignedUserIds: selectedUserIds },
+    });
   };
 
-	const handleSubmitComment = () => {
-		if (!commentText.trim()) return;
-		createComment(
-			{ taskId, content: commentText.trim() },
-			{
-				onSuccess: () => {
-					setCommentText("");
-					refetchComments();
-				},
-			}
-		);
-	};
+  console.log("task341223", task);
 
-	const totalCommentPages = commentsData
-		? Math.ceil(commentsData.total / pageSize)
-		: 1;
+  const handleSubmitComment = () => {
+    if (!commentText.trim()) return;
+    createComment(
+      { taskId, content: commentText.trim() },
+      {
+        onSuccess: () => {
+          setCommentText("");
+          refetchComments();
+        },
+      }
+    );
+  };
 
-	if (isTaskLoading && commentsPage === 1) {
-		return (
-			<div className="container mx-auto p-4 md:p-8 space-y-6">
-				<Skeleton className="h-10 w-64" />
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					<Card className="lg:col-span-2">
-						<CardContent className="space-y-4">
-							<Skeleton className="h-6 w-48" />
-							<div className="flex gap-2">
-								<Skeleton className="h-6 w-24" />
-								<Skeleton className="h-6 w-20" />
-								<Skeleton className="h-6 w-32" />
-							</div>
-							<Skeleton className="h-24 w-full" />
-						</CardContent>
-					</Card>
-					<Card>
-						<CardContent className="space-y-3">
-							<Skeleton className="h-6 w-40" />
-							{[...Array(3)].map((_, i) => (
-								<div key={i} className="space-y-2">
-									<Skeleton className="h-4 w-28" />
-									<Skeleton className="h-12 w-full" />
-								</div>
-							))}
-						</CardContent>
-					</Card>
-				</div>
-			</div>
-		);
-	}
+  const totalCommentPages = commentsData
+    ? Math.ceil(commentsData.total / pageSize)
+    : 1;
 
-	if (isTaskError) {
-		return (
-			<div className="container mx-auto p-8">
-				<Alert variant="destructive">
-					<AlertCircle className="h-4 w-4" />
-					<AlertTitle>Erro ao carregar tarefa</AlertTitle>
-					<AlertDescription>
-						{taskError?.message ||
-							"Não foi possível buscar os dados da tarefa."}
-					</AlertDescription>
-				</Alert>
-			</div>
-		);
-	}
+  if (isTaskLoading && commentsPage === 1) {
+    return (
+      <div className="container mx-auto p-4 md:p-8 space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2">
+            <CardContent className="space-y-4">
+              <Skeleton className="h-6 w-48" />
+              <div className="flex gap-2">
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-32" />
+              </div>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="space-y-3">
+              <Skeleton className="h-6 w-40" />
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (isTaskError) {
+    return (
+      <div className="container mx-auto p-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar tarefa</AlertTitle>
+          <AlertDescription>
+            {taskError?.message ||
+              "Não foi possível buscar os dados da tarefa."}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4 md:p-8 space-y-6">
@@ -231,7 +236,7 @@ function TaskDetailPage() {
             </div>
           </CardContent>
           {task && (
-            <CardFooter className="border-t justify-between">
+            <CardFooter className="border-t justify-between table-column">
               <div className="text-xs text-muted-foreground">
                 Criada em{" "}
                 {new Date(task.createdAt ?? task.dueDate).toLocaleString(
@@ -239,10 +244,13 @@ function TaskDetailPage() {
                 )}
               </div>
               <div className="text-xs text-muted-foreground">
-                Atualizada em{" "}
+                Última atividade em{" "}
                 {new Date(task.updatedAt ?? task.dueDate).toLocaleString(
                   "pt-BR"
                 )}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Autor: {task?.author?.name ?? "Desconhecido"}
               </div>
             </CardFooter>
           )}
@@ -260,7 +268,8 @@ function TaskDetailPage() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Erro ao carregar usuários</AlertTitle>
                 <AlertDescription>
-                  {usersError?.message || "Não foi possível buscar os usuários."}
+                  {usersError?.message ||
+                    "Não foi possível buscar os usuários."}
                 </AlertDescription>
               </Alert>
             )}
@@ -283,28 +292,40 @@ function TaskDetailPage() {
               <div className="space-y-2">
                 {users.map((u) => {
                   const checked = selectedUserIds.includes(u.id);
-                  return (
-                    <label key={u.id} className="flex items-center gap-2 text-sm">
-                      {isAuthor ? (
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleUserSelection(u.id)}
-                          className="size-4"
-                        />
-                      ) : (
-                        <span className={`inline-block size-3 rounded-sm border ${checked ? 'bg-primary border-primary' : 'bg-transparent border-muted-foreground/40'}`} />
-                      )}
-                      <span className="truncate">
-                        {u.name} <span className="text-muted-foreground">({u.email})</span>
-                      </span>
-                    </label>
-                  );
+                  if (u.id !== task?.creatorId)
+                    return (
+                      <label
+                        key={u.id}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        {isAuthor ? (
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleUserSelection(u.id)}
+                            className="size-4"
+                          />
+                        ) : (
+                          <span
+                            className={`inline-block size-3 rounded-sm border ${checked ? "bg-primary border-primary" : "bg-transparent border-muted-foreground/40"}`}
+                          />
+                        )}
+                        <span className="truncate">
+                          {u.name}{" "}
+                          <span className="text-muted-foreground">
+                            ({u.email})
+                          </span>
+                        </span>
+                      </label>
+                    );
                 })}
 
                 {isAuthor && (
                   <div className="flex justify-end pt-2">
-                    <Button onClick={handleSaveAssignments} disabled={isUpdating}>
+                    <Button
+                      onClick={handleSaveAssignments}
+                      disabled={isUpdating}
+                    >
                       {isUpdating ? "Salvando..." : "Salvar Atribuições"}
                     </Button>
                   </div>
@@ -328,7 +349,8 @@ function TaskDetailPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Erro ao carregar comentários</AlertTitle>
               <AlertDescription>
-                {commentsError?.message || "Não foi possível buscar os comentários."}
+                {commentsError?.message ||
+                  "Não foi possível buscar os comentários."}
               </AlertDescription>
             </Alert>
           )}
@@ -344,50 +366,61 @@ function TaskDetailPage() {
             </div>
           )}
 
-          {!isCommentsLoading && commentsData && commentsData.data.length === 0 && (
-            <p className="text-sm text-muted-foreground">Ainda não há comentários.</p>
-          )}
+          {!isCommentsLoading &&
+            commentsData &&
+            commentsData.data.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Ainda não há comentários.
+              </p>
+            )}
 
-          {!isCommentsLoading && commentsData && commentsData.data.length > 0 && (
-            <div className="space-y-4">
-              {commentsData.data.map((comment) => (
-                <div key={comment.id} className="rounded-md border p-3">
-                  <div className="text-xs text-muted-foreground mb-1">
-                    {comment.author.name} • {new Date(comment.createdAt).toLocaleString("pt-BR")}
+          {!isCommentsLoading &&
+            commentsData &&
+            commentsData.data.length > 0 && (
+              <div className="space-y-4">
+                {commentsData.data.map((comment) => (
+                  <div key={comment.id} className="rounded-md border p-3">
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {comment.author.name} •{" "}
+                      {new Date(comment.createdAt).toLocaleString("pt-BR")}
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {comment.content}
+                    </p>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{comment.content}</p>
-                </div>
-              ))}
+                ))}
 
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCommentsPage((p) => Math.max(1, p - 1));
-                      }}
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <span className="text-sm text-muted-foreground px-2">
-                      Página {commentsPage} de {totalCommentPages}
-                    </span>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCommentsPage((p) => Math.min(totalCommentPages, p + 1));
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCommentsPage((p) => Math.max(1, p - 1));
+                        }}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <span className="text-sm text-muted-foreground px-2">
+                        Página {commentsPage} de {totalCommentPages}
+                      </span>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCommentsPage((p) =>
+                            Math.min(totalCommentPages, p + 1)
+                          );
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
 
           {canComment ? (
             <div className="space-y-2">
@@ -397,7 +430,10 @@ function TaskDetailPage() {
                 onChange={(e) => setCommentText(e.target.value)}
               />
               <div className="flex justify-end">
-                <Button onClick={handleSubmitComment} disabled={isCommenting || !commentText.trim()}>
+                <Button
+                  onClick={handleSubmitComment}
+                  disabled={isCommenting || !commentText.trim()}
+                >
                   Enviar Comentário
                 </Button>
               </div>
@@ -406,7 +442,8 @@ function TaskDetailPage() {
             <Alert>
               <AlertTitle>Sem permissão para comentar</AlertTitle>
               <AlertDescription>
-                Você precisa ser o criador da tarefa ou estar atribuído para comentar.
+                Você precisa ser o criador da tarefa ou estar atribuído para
+                comentar.
               </AlertDescription>
             </Alert>
           )}

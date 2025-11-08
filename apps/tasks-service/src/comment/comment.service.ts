@@ -36,6 +36,18 @@ export class CommentService {
         });
       }
 
+      // Verifica se o usuário está atribuído à tarefa
+      const isAssigned =
+        Array.isArray(task.assignedUserIds) &&
+        task.assignedUserIds.includes(userId);
+
+      if (!isAssigned && task.creatorId !== userId) {
+        throw new RpcException({
+          statusCode: 403,
+          message: `User is not assigned to task.`,
+        });
+      }
+
       const comment = this.commentRepository.create({
         taskId,
         userId,

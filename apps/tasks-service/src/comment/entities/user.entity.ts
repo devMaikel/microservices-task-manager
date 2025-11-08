@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Comment } from './comment.entity';
+import { Task } from '../../task/entities/task.entity';
 require('crypto');
 
 @Entity('users')
@@ -37,6 +38,9 @@ export class User {
 
   @OneToMany(() => Comment, (comment) => comment.author)
   comments!: Comment[];
+
+  @OneToMany(() => Task, (task) => task.author)
+  tasks!: Task[];
 
   @BeforeInsert()
   async hashPassword() {

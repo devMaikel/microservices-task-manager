@@ -6,6 +6,10 @@ export async function login(email: string, password: string) {
   console.log("retorno da api /auth/login: ", data);
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
+  localStorage.setItem(
+    "user",
+    JSON.stringify({ email: data.email, id: data.id, name: data.name })
+  );
   return data;
 }
 
@@ -14,6 +18,10 @@ export async function register(email: string, name: string, password: string) {
   console.log("retorno da api /auth/register: ", data);
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
+  localStorage.setItem(
+    "user",
+    JSON.stringify({ email: data.email, id: data.id, name: data.name })
+  );
   return data;
 }
 
@@ -24,12 +32,17 @@ export async function refreshToken() {
   const { data } = await api.post("/auth/refresh", { refreshToken });
   console.log("retorno da api /auth/refresh: ", data);
   localStorage.setItem("accessToken", data.accessToken);
+  localStorage.setItem(
+    "user",
+    JSON.stringify({ email: data.email, id: data.id, name: data.name })
+  );
   return data.accessToken;
 }
 
 export function logout() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
 }
 
 export async function fetchUsers(): Promise<UserBasic[]> {

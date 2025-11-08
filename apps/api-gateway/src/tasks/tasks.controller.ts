@@ -11,6 +11,7 @@ import {
   UseGuards,
   ParseUUIDPipe,
   Delete,
+  HttpException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
@@ -28,6 +29,8 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { ListTasksDto } from './dto/list-tasks-dto';
 import { TaskStatus } from 'src/common/enums/task.enum';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -198,6 +201,16 @@ export class TasksController {
       content: createCommentDto.content,
     };
 
-    return this.taskClient.send({ cmd: 'create_comment' }, payload);
+    return this.taskClient.send({ cmd: 'create_comment' }, payload).pipe(
+      catchError((err) => {
+        const status =
+          err?.statusCode ?? err?.status ?? err?.error?.statusCode ?? 500;
+        const message =
+          typeof err?.message === 'string'
+            ? err.message
+            : err?.error?.message ?? 'Internal server error';
+        return throwError(() => new HttpException(message, status));
+      }),
+    );
   }
 }
