@@ -90,7 +90,6 @@ function TaskDetailPage() {
   const { mutate: createComment, isPending: isCommenting } = useCreateComment();
   const [commentText, setCommentText] = useState("");
 
-  // Usuários para atribuição
   const {
     data: users,
     isLoading: isUsersLoading,
@@ -203,7 +202,6 @@ function TaskDetailPage() {
           </Link>
         </Button>
       </div>
-      {/* Top grid: Detalhes da tarefa à esquerda, usuários à direita */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardContent className="space-y-4">
@@ -255,7 +253,6 @@ function TaskDetailPage() {
             </CardFooter>
           )}
         </Card>
-        {/* Painel de usuários à direita */}
         <Card>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
@@ -336,7 +333,6 @@ function TaskDetailPage() {
         </Card>
       </div>
 
-      {/* Comentários abaixo da tarefa */}
       <Card>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">

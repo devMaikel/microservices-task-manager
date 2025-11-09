@@ -5,6 +5,7 @@ import { Comment } from './entities/comment.entity';
 import { CreateCommentPayload } from './dto/create-comment.payload';
 import { RpcException } from '@nestjs/microservices';
 import { Task } from 'src/task/entities/task.entity';
+import { EventsPublisherService } from 'src/events/publisher.service';
 import {
   ListCommentsPayload,
   PaginatedComments,
@@ -16,6 +17,7 @@ export class CommentService {
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
     private dataSource: DataSource,
+    private eventsPublisher: EventsPublisherService,
   ) {}
 
   async createComment(payload: CreateCommentPayload): Promise<Comment> {
@@ -36,7 +38,6 @@ export class CommentService {
         });
       }
 
-      // Verifica se o usuário está atribuído à tarefa
       const isAssigned =
         Array.isArray(task.assignedUserIds) &&
         task.assignedUserIds.includes(userId);
@@ -57,12 +58,15 @@ export class CommentService {
 
       await queryRunner.commitTransaction();
 
-      // this.rabbitClient.emit('task.comment.created', {
-      //   taskId: taskId,
-      //   commentId: savedComment.id,
-      //   userId: userId,
-      //   content: content,
-      // });
+      await this.eventsPublisher.publish('comment:new', {
+        taskId: taskId,
+        taskTitle: task.title,
+        commentId: savedComment.id,
+        userId: userId,
+        content: content,
+        assignedUserIds: task.assignedUserIds ?? [],
+        creatorId: task.creatorId,
+      });
 
       return savedComment;
     } catch (error) {

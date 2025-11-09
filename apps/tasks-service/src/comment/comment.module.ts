@@ -4,6 +4,7 @@ import { DatabaseModule } from 'src/database/database.module';
 import { Comment } from './entities/comment.entity';
 import { CommentService } from './comment.service';
 import { CommentController } from './comment.controller';
+import { EventsPublisherService } from '../events/publisher.service';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { CommentController } from './comment.controller';
     DatabaseModule
   ],
   controllers: [CommentController],
-  providers: [CommentService],
+  providers: [CommentService, EventsPublisherService],
   exports: [CommentService],
 })
 export class CommentModule {}

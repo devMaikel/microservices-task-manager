@@ -1,4 +1,4 @@
-import { Comment } from "../entities/comment.entity";
+import { Comment } from '../entities/comment.entity';
 
 export interface ListCommentsPayload {
   taskId: string;
@@ -6,7 +6,6 @@ export interface ListCommentsPayload {
   size: number;
 }
 
-// A estrutura de retorno para o Gateway
 export interface PaginatedComments {
   data: Comment[];
   total: number;

@@ -14,6 +14,16 @@ import {
 import { UpdateTaskPayload } from './dto/update-task.payload';
 import { Task } from './entities/task.entity';
 import { ListTasksDto } from './dto/list-tasks-dto';
+import { EventsPublisherService } from '../events/publisher.service';
+
+const FIELD_LABELS: Record<string, string> = {
+  title: 'Título',
+  description: 'Descrição',
+  dueDate: 'Data Limite',
+  priority: 'Prioridade',
+  status: 'Status',
+  assignedUserIds: 'Usuários Atribuídos',
+};
 
 @Injectable()
 export class TaskService {
@@ -24,6 +34,7 @@ export class TaskService {
     private historyRepository: Repository<TaskHistory>,
     // @Inject('RABBITMQ_CLIENT') private readonly rabbitClient: ClientProxy,
     private dataSource: DataSource,
+    private eventsPublisher: EventsPublisherService,
   ) {}
 
   private async registerCreationHistory(
@@ -138,12 +149,12 @@ export class TaskService {
 
       await queryRunner.commitTransaction();
 
-      // this.rabbitClient.emit('task.created', {
-      //   taskId: savedTask.id,
-      //   creatorId: savedTask.creatorId,
-      //   assignedUserIds: savedTask.assignedUserIds,
-      //   title: savedTask.title,
-      // });
+      await this.eventsPublisher.publish('task:created', {
+        taskId: savedTask.id,
+        creatorId: savedTask.creatorId,
+        assignedUserIds: savedTask.assignedUserIds ?? [],
+        title: savedTask.title,
+      });
 
       return savedTask;
     } catch (error) {
@@ -245,12 +256,18 @@ export class TaskService {
 
       await queryRunner.commitTransaction();
 
+      console.log('diffzss', diffs);
+
       if (diffs.length > 0) {
-        // this.rabbitClient.emit('task.updated', {
-        //   taskId: updatedTask.id,
-        //   userId: userId,
-        //   changes: diffs.map((d) => d.field),
-        // });
+        await this.eventsPublisher.publish('task:updated', {
+          taskId: updatedTask.id,
+          taskTitle: oldTask.title,
+          userId: userId,
+          changes: diffs.map((d) => FIELD_LABELS[d.field] ?? d.field),
+          assignedUserIds: updatedTask.assignedUserIds ?? [],
+          creatorId: updatedTask.creatorId,
+          status: updatedTask.status,
+        });
       }
 
       return updatedTask;

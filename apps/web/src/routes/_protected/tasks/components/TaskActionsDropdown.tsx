@@ -39,6 +39,8 @@ export const TaskActionsDropdown: React.FC<TaskActionsDropdownProps> = ({
     });
   };
 
+  console.log("hesuaij", user.id, task.creatorId);
+
   return (
     <>
       <DropdownMenu>

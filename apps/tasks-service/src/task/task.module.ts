@@ -7,6 +7,7 @@ import { TaskController } from './task.controller';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { CommentModule } from 'src/comment/comment.module';
 import { Task } from './entities/task.entity';
+import { EventsPublisherService } from '../events/publisher.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { Task } from './entities/task.entity';
     CommentModule
   ],
   controllers: [TaskController],
-  providers: [TaskService],
+  providers: [TaskService, EventsPublisherService],
   exports: [TaskService],
 })
 export class TaskModule {}
