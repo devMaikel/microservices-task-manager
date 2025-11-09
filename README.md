@@ -29,9 +29,8 @@ Monorepo em Turborepo com microserviços NestJS e frontend React, oferecendo aut
 
 ## Problemas Conhecidos e Melhorias
 
-- Health checks: adicionar endpoints `/health` nos serviços e readiness/liveness em Docker/K8s.
 - Observabilidade: totalmente ausente no projeto atualmente.
-- Segurança: reforçar rate limit por IP/rota, validação de payloads, e configurar HTTPS/CSRF conforme necessidade.
+- Segurança: reforçar rate limit por IP/rota.
 
 ## Tempo Gasto (estimativa)
 
@@ -59,7 +58,7 @@ Total aproximado: 51h
 **Subir infraestrutura com Docker**
 
 - Instalar deps na raiz do projeto: `npm install`
-- `docker-compose up -d`
+- `docker compose up -d`
 
 **Rodar serviços individualmente (desenvolvimento)**
 

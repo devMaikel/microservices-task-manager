@@ -36,9 +36,9 @@ services:
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     networks:
       - challenge-network
 
@@ -68,9 +68,9 @@ services:
       - JWT_SECRET=sW0rdF15h
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     networks:
       - challenge-network
 
@@ -100,9 +100,9 @@ services:
       - JWT_SECRET=sW0rdF15h
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     networks:
       - challenge-network
 
@@ -132,9 +132,9 @@ services:
       - JWT_SECRET=sW0rdF15h
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     networks:
       - challenge-network
 
@@ -154,6 +154,12 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: challenge_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
   # RabbitMQ
   rabbitmq:
@@ -170,6 +176,12 @@ services:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
     volumes: ["rabbitmq_data:/var/lib/rabbitmq"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
 volumes:
   postgres_data:
