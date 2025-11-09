@@ -39,7 +39,7 @@ export function useNotifications(enabled: boolean, token?: string) {
 
     socket.on("connect_error", (err: any) => {
       const msg = err?.message || "Falha ao conectar ao WebSocket";
-      toast.error(msg);
+      // toast.error(msg);
       console.error("[ws] connect_error", err);
     });
 
@@ -64,7 +64,8 @@ export function useNotifications(enabled: boolean, token?: string) {
 
     socket.on("unauthorized", (payload: any) => {
       const reason = payload?.reason || "unauthorized";
-      toast.error(`WebSocket não autorizado: ${reason}`);
+      console.log(`WebSocket não autorizado: ${reason}`);
+      // toast.error(`WebSocket não autorizado: ${reason}`);
     });
 
     socket.on("disconnect", () => {});

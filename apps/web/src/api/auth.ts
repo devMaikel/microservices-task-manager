@@ -2,27 +2,37 @@ import api from "./api";
 import type { UserBasic } from "./interfaces";
 
 export async function login(email: string, password: string) {
-  const { data } = await api.post("/auth/login", { email, password });
-  console.log("retorno da api /auth/login: ", data);
-  localStorage.setItem("accessToken", data.accessToken);
-  localStorage.setItem("refreshToken", data.refreshToken);
-  localStorage.setItem(
-    "user",
-    JSON.stringify({ email: data.email, id: data.id, name: data.name })
-  );
-  return data;
+  try {
+    const { data } = await api.post("/auth/login", { email, password });
+    console.log("retorno da api /auth/login: ", data);
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("refreshToken", data.refreshToken);
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ email: data.email, id: data.id, name: data.name })
+    );
+    return data;
+  } catch (err: any) {
+    const message = err?.response?.data?.message || "Credenciais inválidas.";
+    throw new Error(message);
+  }
 }
 
 export async function register(email: string, name: string, password: string) {
-  const { data } = await api.post("/auth/register", { email, name, password });
-  console.log("retorno da api /auth/register: ", data);
-  localStorage.setItem("accessToken", data.accessToken);
-  localStorage.setItem("refreshToken", data.refreshToken);
-  localStorage.setItem(
-    "user",
-    JSON.stringify({ email: data.email, id: data.id, name: data.name })
-  );
-  return data;
+  try {
+    const { data } = await api.post("/auth/register", { email, name, password });
+    console.log("retorno da api /auth/register: ", data);
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("refreshToken", data.refreshToken);
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ email: data.email, id: data.id, name: data.name })
+    );
+    return data;
+  } catch (err: any) {
+    const message = err?.response?.data?.message || "E-mail já registrado.";
+    throw new Error(message);
+  }
 }
 
 export async function refreshToken() {

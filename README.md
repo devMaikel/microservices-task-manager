@@ -1,135 +1,78 @@
-# Turborepo starter
+# Microservices Task Manager
 
-This Turborepo starter is maintained by the Turborepo core team.
+Monorepo em Turborepo com microserviços NestJS e frontend React, oferecendo autenticação, gerenciamento de tarefas, comentários e notificações em tempo real.
 
-## Using this example
+**Apps**
 
-Run the following command:
+- `apps/api-gateway` — HTTP API, Swagger, validação e rate limit.
+- `apps/auth-service` — microserviço de usuários (JWT, refresh token, Postgres).
+- `apps/tasks-service` — microserviço de tarefas e comentários (Postgres, RMQ).
+- `apps/notifications-service` — consumo de eventos e WebSocket (Socket.IO).
+- `apps/web` — frontend React + TanStack Router/Query.
 
-```sh
-npx create-turbo@latest
-```
+**Packages**
 
-## What's inside?
+- `packages/ui` — componentes React compartilhados.
+- `packages/types` — tipos compartilhados.
+- `packages/eslint-config` e `packages/typescript-config` — configuração base.
 
-This Turborepo includes the following packages/apps:
+## Arquitetura
 
-### Apps and Packages
+![Diagrama da arquitetura](./docs/arquitetura.png)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Decisões Técnicas e Trade-offs
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- React tanstack Query para cache e invalidação simples e previsível ao receber notificações.
+- TanStack Router: rotas baseadas em arquivos.
+- Turborepo: desenvolvimento e build paralelos.
+- Rate limiting: `@nestjs/throttler` global (10 req/seg) no gateway. Simples e eficaz, mas sem granularidade por IP por padrão.
 
-### Utilities
+## Problemas Conhecidos e Melhorias
 
-This Turborepo has some additional tools already setup for you:
+- Health checks: adicionar endpoints `/health` nos serviços e readiness/liveness em Docker/K8s.
+- Observabilidade: totalmente ausente no projeto atualmente.
+- Segurança: reforçar rate limit por IP/rota, validação de payloads, e configurar HTTPS/CSRF conforme necessidade.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Tempo Gasto (estimativa)
 
-### Build
+- Arquitetura e setup do monorepo: 4h
+- API Gateway (Swagger, validação, CORS): 8h
+- Rate limiting: 1h
+- Auth Service (JWT, refresh, DB): 8h
+- Tasks Service (tarefas, comentários, DB, RMQ): 12h
+- Notifications Service (RabbitMQ, Socket.IO): 8h
+- Frontend (Rotas, Query, notifs em tempo real, toasts): 8h
+- Documentação e melhorias: 2h
 
-To build all apps and packages, run the following command:
+Total aproximado: 51h
 
-```
-cd my-turborepo
+## Instruções de Execução
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+**Pré-requisitos**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+- Docker
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+**Variáveis de ambiente recomendadas**
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+- Já configuradas no `docker-compose.yml`
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+**Subir infraestrutura com Docker**
 
-### Develop
+- Instalar deps na raiz do projeto: `npm install`
+- `docker-compose up -d`
 
-To develop all apps and packages, run the following command:
+**Rodar serviços individualmente (desenvolvimento)**
 
-```
-cd my-turborepo
+- Instalar deps: `npm install`
+- Auth Service: `npm --workspace=apps/auth-service run dev`
+- Tasks Service: `npm --workspace=apps/tasks-service run dev`
+- Notifications Service: `npm --workspace=apps/notifications-service run dev`
+- API Gateway: `npm --workspace=apps/api-gateway run start:dev`
+- Web (frontend): `npm --workspace=apps/web run dev` e abrir `http://localhost:3000/`
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+**Fluxo de validação**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- Login no frontend para iniciar WS.
+- Criar/atualizar tarefas: UI deve refazer fetch automaticamente (Tanstack/React Query).
+- Adicionar comentário em uma tarefa aberta em outra sessão: lista de comentários deve atualizar via notificação `comment:new`.
+- Rate limit: fazer >10 requisições em 1 segundo no gateway → deve retornar `429`.

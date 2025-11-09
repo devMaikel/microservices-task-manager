@@ -16,7 +16,7 @@ import { RabbitMqConsumer } from './rabbitmq.consumer';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_DATABASE || 'challenge_db',
       entities: [Notification],
-      synchronize: true,
+      // synchronize: true,
     }),
     TypeOrmModule.forFeature([Notification]),
   ],

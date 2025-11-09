@@ -22,8 +22,8 @@ function Index() {
         </h1>
         <p className="text-xl text-gray-600 mb-8">
           A plataforma de gestão de tarefas colaborativa construída com
-          Microserviços NestJS e RabbitMQ. Organize projetos, atribua
-          responsabilidades e acompanhe o histórico em tempo real.
+          Microserviços NestJS e RabbitMQ. Organize projetos e atribua
+          responsabilidades em tempo real.
         </p>
 
         <Link to="/sign-in">
@@ -47,14 +47,12 @@ function Index() {
             <CheckCircle2 className="h-8 w-8 text-primary mb-2" />
             <CardTitle>Gestão Completa de Tarefas</CardTitle>
             <CardDescription>
-              Crie, atualize e defina prioridades (LOW, URGENT) e status (TODO,
-              DONE) em um CRUD completo.
+              Crie, atualize e defina prioridades e status em tempo real.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside text-sm text-gray-600">
               <li>Prazo e Prioridade Personalizáveis.</li>
-              <li>Histórico (Audit Log) de Alterações.</li>
             </ul>
           </CardContent>
         </Card>
@@ -70,7 +68,7 @@ function Index() {
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside text-sm text-gray-600">
-              <li>Múltiplos Atribuídos por Tarefa.</li>
+              <li>Múltiplos Usuários Atribuídos por Tarefa.</li>
               <li>Notificações em Tempo Real.</li>
             </ul>
           </CardContent>
@@ -81,14 +79,12 @@ function Index() {
             <MessageSquare className="h-8 w-8 text-primary mb-2" />
             <CardTitle>Comentários e Real-Time</CardTitle>
             <CardDescription>
-              Comunique-se diretamente na tarefa e receba atualizações via
-              WebSocket.
+              Comunique-se diretamente na tarefa e receba atualizações na hora.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside text-sm text-gray-600">
               <li>Comentários paginados.</li>
-              <li>Baseado em RabbitMQ para eventos.</li>
             </ul>
           </CardContent>
         </Card>

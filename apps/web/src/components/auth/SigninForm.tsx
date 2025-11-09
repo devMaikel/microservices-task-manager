@@ -22,8 +22,8 @@ export const SigninForm = ({ onSubmit }: LoginFormProps) => {
     resolver: zodResolver(signInFormSchema),
     mode: "onSubmit",
     defaultValues: {
-      email: "joaosilva@gmail.com",
-      password: "coxinha123",
+      email: "",
+      password: "",
     },
   });
   const isPending = false;

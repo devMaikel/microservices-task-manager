@@ -19,7 +19,8 @@ function SignIn() {
 			navigate({ to: "/tasks" });
 		} catch (err) {
 			console.log("erro login: ", err);
-			toast.error("Erro ao fazer login!");
+			const message = (err as any)?.message || (err as any)?.response?.data?.message || "Credenciais inválidas.";
+			toast.error(message);
 		}
 	};
 

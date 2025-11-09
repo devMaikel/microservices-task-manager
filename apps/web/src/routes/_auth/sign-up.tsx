@@ -19,7 +19,8 @@ function SignUp() {
 			navigate({ to: "/tasks" });
 		} catch (err) {
 			console.log("erro Cadastro: ", err);
-			toast.error("Erro ao fazer Cadastro!");
+			const message = (err as any)?.message || (err as any)?.response?.data?.message || "E-mail já registrado.";
+			toast.error(message);
 		}
 	};
 

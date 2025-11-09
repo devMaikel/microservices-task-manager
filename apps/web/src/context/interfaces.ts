@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export interface AuthContextType {
 	user: any;
-	signUp: (email: string, name: string, password: string) => void;
+	signUp: (email: string, name: string, password: string) => Promise<void>;
 	signIn: (email: string, password: string) => Promise<void>;
 	signOut: () => void;
 }
