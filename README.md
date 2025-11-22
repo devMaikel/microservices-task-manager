@@ -18,7 +18,7 @@ Monorepo em Turborepo com microserviços NestJS e frontend React, oferecendo aut
 
 ## Arquitetura
 
-![Diagrama da arquitetura](./docs/arquitetura.png)
+![Diagrama da arquitetura](https://github.com/devMaikel/microservices-task-manager/blob/main/docs/arquitetura.png)
 
 ## Decisões Técnicas e Trade-offs
 
